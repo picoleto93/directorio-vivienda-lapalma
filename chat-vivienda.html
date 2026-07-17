@@ -93,7 +93,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   <div class="map-container" id="mapContainer"></div>
   <div class="input-area">
     <input type="text" id="input" placeholder="Ej: un piso barato en Los Llanos con garaje" autofocus>
-    <button id="sendBtn" onclick="sendMessage()">→</button>
+    <button id="sendBtn">→</button>
   </div>
 </div>
 
@@ -634,6 +634,7 @@ function toggleView(view) {
 }
 
 inputEl.addEventListener("keydown", e => { if (e.key === "Enter") sendMessage(); });
+sendBtn.addEventListener("click", sendMessage);
 
 addMessage("¡Hola! Soy tu asistente con IA para vivienda en La Palma. Busco casas, pisos, apartamentos, chalets, adosadas, estudios y obra nueva. Puedes preguntar: piscina, garaje, terraza, vistas al mar, reformado, jardín, ascensor, trastero, casa terrera, barbacoa, chimenea, ático, dúplex... ¡Prueba con lenguaje natural!", "bot");
 loadData().then(() => {});
