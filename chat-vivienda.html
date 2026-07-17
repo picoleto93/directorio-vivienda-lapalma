@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chat Vivienda La Palma</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f0f2f5;height:100vh;display:flex;justify-content:center;align-items:center}
+.chat-container{width:100%;max-width:480px;height:100vh;max-height:900px;background:#fff;display:flex;flex-direction:column;border-radius:0;box-shadow:none;position:relative}
+@media(min-width:500px){.chat-container{border-radius:16px;height:90vh;box-shadow:0 8px 32px rgba(0,0,0,.12)}}
+.chat-header{background:#1a73e8;color:#fff;padding:16px 20px;border-radius:0;text-align:center;position:relative}
+@media(min-width:500px){.chat-header{border-radius:16px 16px 0 0}}
+.chat-header h1{font-size:18px;font-weight:600}
+.chat-header p{font-size:13px;opacity:.9;margin-top:4px}
+.chat-header .model-status{font-size:11px;opacity:.7;margin-top:4px;font-style:italic}
+.messages{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;scroll-behavior:smooth}
+.message{max-width:88%;padding:12px 14px;border-radius:14px;font-size:14px;line-height:1.5;animation:fadeIn .25s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.message.bot{background:#f0f2f5;align-self:flex-start;border-bottom-left-radius:4px}
+.message.user{background:#1a73e8;color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+.message.system{background:#fff8e1;color:#795548;align-self:center;font-size:13px;border-radius:8px;max-width:75%;text-align:center}
+.quick-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.quick-btn{background:#e8f0fe;color:#1a73e8;border:1px solid #d2e3fc;padding:8px 14px;border-radius:20px;font-size:13px;cursor:pointer;transition:all .15s}
+.quick-btn:hover{background:#d2e3fc;transform:scale(1.02)}
+.quick-btn:disabled{opacity:.5;cursor:wait}
+.result-card{background:#fff;border:1px solid #e0e0e0;border-radius:12px;padding:14px;margin-top:8px;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.result-card .title{font-weight:600;font-size:15px;color:#1a1a1a}
+.result-card .price{font-size:18px;font-weight:700;color:#1a73e8;margin:4px 0}
+.result-card .details{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.result-card .detail-tag{background:#f5f5f5;padding:3px 10px;border-radius:12px;font-size:12px;color:#555}
+.result-card .detail-tag.highlight{background:#e8f5e9;color:#2e7d32}
+.result-card .desc{font-size:13px;color:#666;margin:6px 0}
+.result-card .meta{font-size:12px;color:#999;margin-top:6px}
+.result-card .meta a{color:#1a73e8;text-decoration:none}
+.result-card .meta a:hover{text-decoration:underline}
+.result-card .warning{background:#fff3e0;color:#e65100;padding:6px 10px;border-radius:8px;font-size:12px;margin-top:6px}
+.result-card .relevance{font-size:11px;color:#1a73e8;margin-top:4px}
+.input-area{display:flex;gap:8px;padding:12px 16px;border-top:1px solid #e0e0e0;background:#fff}
+@media(min-width:500px){.input-area{border-radius:0 0 16px 16px}}
+.input-area input{flex:1;padding:10px 14px;border:1px solid #ddd;border-radius:24px;font-size:14px;outline:none;transition:border .15s}
+.input-area input:focus{border-color:#1a73e8}
+.input-area button{background:#1a73e8;color:#fff;border:none;width:42px;height:42px;border-radius:50%;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;transition:background .15s;flex-shrink:0}
+.input-area button:hover{background:#1557b0}
+.input-area button:disabled{opacity:.5;cursor:default}
+.typing{display:flex;gap:4px;padding:4px 0}
+.typing span{width:6px;height:6px;background:#999;border-radius:50%;animation:bounce 1.2s infinite}
+.typing span:nth-child(2){animation-delay:.2s}
+.typing span:nth-child(3){animation-delay:.4s}
+@keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-6px)}}
+.progress-bar{height:3px;background:#e0e0e0;border-radius:2px;overflow:hidden;margin-top:8px}
+.progress-bar .fill{height:100%;background:#1a73e8;width:0%;transition:width .3s ease;border-radius:2px}
+.result-card{display:flex;gap:12px;background:#fff;border:1px solid #e0e0e0;border-radius:12px;padding:10px;margin-top:8px;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.card-img{width:120px;min-width:120px;height:100px;border-radius:8px;overflow:hidden;position:relative;cursor:pointer;background:#f0f2f5}
+.card-img img{width:100%;height:100%;object-fit:cover;display:block}
+.badge{position:absolute;top:6px;left:6px;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;color:#fff;line-height:1.3}
+.badge-venta{background:#2e7d32}
+.badge-alquiler{background:#1565c0}
+.badge-vacacional{background:#e65100}
+.card-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.card-body .title{font-weight:600;font-size:14px;color:#1a1a1a;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card-body .price{font-size:17px;font-weight:700;color:#1a73e8;line-height:1.2}
+.card-body .price .m2{font-size:12px;font-weight:400;color:#888}
+.card-body .details{display:flex;flex-wrap:wrap;gap:3px}
+.card-body .detail-tag{background:#f5f5f5;padding:2px 8px;border-radius:10px;font-size:11px;color:#555}
+.card-body .meta{font-size:11px;color:#999;line-height:1.3}
+.card-body .meta .fuente{color:#1a73e8;font-weight:500}
+.btn-yaencontre{display:inline-flex;align-items:center;gap:4px;background:#fff;border:1px solid #1a73e8;color:#1a73e8;padding:4px 12px;border-radius:16px;font-size:11px;font-weight:600;text-decoration:none;cursor:pointer;transition:all .15s;margin-top:2px;align-self:flex-start}
+.btn-yaencontre:hover{background:#1a73e8;color:#fff}
+.result-card .warning{background:#fff3e0;color:#e65100;padding:4px 8px;border-radius:6px;font-size:11px;margin-top:4px}
+.result-card .relevance{font-size:11px;color:#1a73e8;margin-top:2px}
+.map-toggle{display:flex;gap:6px;margin:8px 0 4px}
+.map-toggle button{flex:1;padding:6px;border:1px solid #ddd;border-radius:20px;font-size:12px;cursor:pointer;background:#fff;color:#555;transition:all .15s}
+.map-toggle button.active{background:#1a73e8;color:#fff;border-color:#1a73e8}
+.map-container{width:100%;height:400px;border-radius:12px;overflow:hidden;border:1px solid #e0e0e0;display:none;margin-top:4px}
+.map-container .leaflet-popup-content{margin:6px 10px;font-size:13px;line-height:1.4}
+.map-container .leaflet-popup-content img{width:100%;height:80px;object-fit:cover;border-radius:4px;margin-bottom:4px}
+</style>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+</head>
+<body>
+
+<div class="chat-container">
+  <div class="chat-header">
+    <h1>Vivienda La Palma</h1>
+    <p>Búsqueda inteligente · <span id="propCount">442</span> viviendas < 220.000€</p>
+    <div class="model-status" id="modelStatus">Iniciando motor de IA...</div>
+    <div class="model-status" id="dataStatus" style="font-size:10px"></div>
+  </div>
+  <div class="messages" id="messages"></div>
+  <div class="map-container" id="mapContainer"></div>
+  <div class="input-area">
+    <input type="text" id="input" placeholder="Ej: un piso barato en Los Llanos con garaje" autofocus>
+    <button id="sendBtn" onclick="sendMessage()">→</button>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+<script type="module">
+import { pipeline, cos_sim } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.1/dist/transformers.min.js';
+
+let props = [];
+let DATA_META = {};
+const PROPIEDADES_URL = "propiedades.json";
+
+async function loadData() {
+  try {
+    const resp = await fetch(PROPIEDADES_URL + "?t=" + Date.now());
+    if (resp.ok) {
+      const data = await resp.json();
+      props = data.propiedades || [];
+      DATA_META = data.meta || {};
+      document.getElementById("propCount").textContent = props.length;
+      const fecha = DATA_META.fecha_actualizacion || "";
+      document.getElementById("dataStatus").textContent = fecha ? "📅 Actualizado: " + fecha : "";
+      if (typeof initModel === "function") initModel();
+    }
+  } catch (e) {
+    console.error("Error cargando propiedades.json:", e);
+    addMessage("⚠️ No se pudieron cargar los datos de viviendas. Verifica la conexión e intenta recargar la página.", "system");
+    if (typeof initModel === "function") initModel();
+  }
+}
+const PRECIO_MAXIMO = 220000;
+let extractor = null;
+let propEmbeddings = [];
+let modelReady = false;
+let fallbackMode = false;
+
+const messagesEl = document.getElementById("messages");
+const inputEl = document.getElementById("input");
+const sendBtn = document.getElementById("sendBtn");
+const modelStatus = document.getElementById("modelStatus");
+
+function normalize(s) {
+  return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+
+function formatPrecio(n) {
+  return new Intl.NumberFormat("es-ES", {style:"currency",currency:"EUR",maximumFractionDigits:0}).format(n);
+}
+
+function getOperacionBadge(operacion) {
+  if (operacion === "alquiler") return '<span class="badge badge-alquiler">ALQUILER</span>';
+  if (operacion === "vacacional") return '<span class="badge badge-vacacional">VACACIONAL</span>';
+  return '<span class="badge badge-venta">COMPRAR</span>';
+}
+
+function formatCard(prop, score) {
+  const tags = [];
+  if (prop.dormitorios) tags.push(`${prop.dormitorios} hab`);
+  if (prop.banos) tags.push(`${prop.banos} baño${prop.banos > 1 ? "s" : ""}`);
+  if (prop.metros) tags.push(`${prop.metros} m²`);
+  if (prop.piscina) tags.push("Piscina");
+  if (prop.garaje) tags.push("Garaje");
+  if (prop.terraza) tags.push("Terraza");
+  if (prop.ascensor) tags.push("Ascensor");
+  if (prop.vistas_mar) tags.push("Vistas mar");
+  if (prop.reformado) tags.push("Reformado");
+  if (prop.amueblado) tags.push("Amueblado");
+  if (prop.trastero) tags.push("Trastero");
+  if (prop.jardin) tags.push("Jardín");
+  const tagHtml = tags.map(t => `<span class="detail-tag">${t}</span>`).join("");
+
+  const warning = (!prop.verificada || !prop.activa)
+    ? (prop.fuente && prop.fuente.toLowerCase().includes("infoisla") && !prop.fuente.toLowerCase().includes("infoislalapalma")
+      ? `<div class="warning">Dato histórico (infoisla.com caído)</div>`
+      : `<div class="warning">Dato extraído de web externa — confirma con el anunciante</div>`)
+    : "";
+
+  const pct = score !== undefined ? Math.round(score * 100) : null;
+  const rel = pct !== null ? `<div class="relevance">Coincidencia: ${pct}%</div>` : "";
+  const precioM2 = prop.precio_m2 ? `<span class="m2"> · ${formatPrecio(prop.precio_m2)}/m²</span>` : "";
+  const imgHtml = prop.imagen_principal
+    ? `<div class="card-img" onclick="window.open('${prop.url}','_blank')"><img src="${prop.imagen_principal}" alt="" loading="lazy">${getOperacionBadge(prop.operacion)}</div>`
+    : `<div class="card-img" style="display:flex;align-items:center;justify-content:center;font-size:24px;color:#ccc">🏠${getOperacionBadge(prop.operacion)}</div>`;
+
+  return `<div class="result-card">
+    ${imgHtml}
+    <div class="card-body">
+      <div class="title">${prop.titulo}</div>
+      <div class="price">${formatPrecio(prop.precio)}${precioM2}</div>
+      <div class="details">${tagHtml}</div>
+      <div class="meta"><span class="fuente">${prop.fuente}</span> · ${prop.zona}</div>
+      <a class="btn-yaencontre" href="${prop.url}" target="_blank">🔗 Ver en yaencontre</a>
+      ${rel}${warning}
+    </div>
+  </div>`;
+}
+
+function buildPropertyText(prop) {
+  const t = prop.tipo;
+  const features = [];
+  if (t === "obra_nueva") features.push("obra nueva llave en mano");
+  else if (t === "chalet") features.push("chalet casa independiente");
+  else if (t === "adosada") features.push("casa adosada casa pareada");
+  else if (t === "apartamento") features.push("apartamento piso vivienda");
+  else if (t === "casa") features.push("casa vivienda unifamiliar");
+  else if (t === "piso") features.push("piso vivienda piso centrico");
+  else if (t === "estudio") features.push("estudio loft estudio abierto");
+  else if (t === "desarrollo") features.push("desarrollo obra nueva promocion");
+  else features.push("inmueble propiedad vivienda");
+  if (prop.dormitorios) features.push(`${prop.dormitorios} dormitorios ${prop.dormitorios} habitaciones`);
+  if (prop.banos) features.push(`${prop.banos} baños ${prop.banos} cuartos de bano`);
+  if (prop.metros) features.push(`${prop.metros} metros cuadrados ${prop.metros} m2 construidos`);
+  if (prop.metros_parcela) features.push(`parcela ${prop.metros_parcela} metros`);
+  if (prop.piscina) features.push("piscina piscina comunitaria piscina privada pileta");
+  if (prop.garaje) features.push("garaje parking cochera estacionamiento plaza de garaje");
+  if (prop.terraza) features.push("terraza balcon solarium porche patio");
+  if (prop.ascensor) features.push("ascensor elevador");
+  if (prop.vistas_mar) features.push("vistas al mar vistas oceanicas frente mar primera linea de mar");
+  if (prop.reformado) features.push("reformado renovado rehabilitado restaurado");
+  if (prop.amueblado) features.push("amueblado equipado con muebles llave en mano");
+  if (prop.trastero) features.push("trastero almacen cuarto almacenamiento");
+  if (prop.jardin) features.push("jardin zonas verdes area recreativa parque");
+  if (prop.estado === "obra_nueva") features.push("obra nueva estreno");
+  const extraTerms = ["barbacoa", "chimenea", "calefaccion", "aire acondicionado", "cocina equipada",
+    "cocina americana", "armarios empotrados", "doble acristalamiento", "suelo radiante", "suite",
+    "vestidor", "despacho", "luminoso", "exterior", "gimnasio", "eficiencia energetica",
+    "placas solares", "domotica", "videoportero", "puerta blindada", "alarma"];
+  features.push(...extraTerms);
+  const precio = prop.precio ? `, precio ${prop.precio} euros ${prop.precio} eur` : "";
+  return `${prop.titulo}. ${prop.descripcion} ${features.join(", ")}${precio}. Zona: ${prop.zona}.`;
+}
+
+async function initModel() {
+  modelStatus.textContent = "Descargando modelo de IA (~23MB, solo la primera vez)...";
+  try {
+    extractor = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2', {
+      progress_callback: (data) => {
+        if (data.status === 'progress' && typeof data.progress === 'number') {
+          const pct = Math.round(data.progress * 100);
+          modelStatus.textContent = `Descargando modelo: ${pct}%`;
+        }
+      }
+    });
+    modelStatus.textContent = "Modelo listo — puedes preguntar en lenguaje natural";
+    modelReady = true;
+
+    const texts = props.map(buildPropertyText);
+    const embeddings = await extractor(texts, { pooling: 'mean', normalize: true });
+    propEmbeddings = embeddings.tolist();
+  } catch (e) {
+    console.warn("Transformers.js no disponible, usando modo búsqueda clásica:", e);
+    modelStatus.textContent = "Modo búsqueda clásica activo";
+    fallbackMode = true;
+    modelReady = true;
+  }
+}
+
+function extractFilters(query) {
+  const q = normalize(query);
+  const filters = { operaciones: [], zonas: [], tipos: [], precioMax: PRECIO_MAXIMO, dormMin: null, extras: [], descKeywords: [] };
+
+  const ZONAS_MAP = {
+    "los llanos": "Los Llanos de Aridane","llanos": "Los Llanos de Aridane","los llanos de aridane": "Los Llanos de Aridane",
+    "el paso": "El Paso","paso": "El Paso",
+    "tazacorte": "Tazacorte",
+    "santa cruz": "Santa Cruz de La Palma","capital": "Santa Cruz de La Palma","santa cruz de la palma": "Santa Cruz de La Palma",
+    "brena alta": "Breña Alta","brena alta": "Breña Alta",
+    "brena baja": "Breña Baja","brena baja": "Breña Baja",
+    "villa de mazo": "Villa de Mazo","mazo": "Villa de Mazo",
+    "fuencaliente": "Fuencaliente","fuencaliente de la palma": "Fuencaliente",
+    "puntallana": "Puntallana",
+    "tijarafe": "Tijarafe","Los Llanos": "Los Llanos de Aridane",
+    "puerto de tazacorte": "Tazacorte","playa de tazacorte": "Tazacorte",
+    "triana": "Los Llanos de Aridane","carrilla": "Los Llanos de Aridane",
+    "argual": "Los Llanos de Aridane","todoque": "Los Llanos de Aridane"
+  };
+  for (const [k, v] of Object.entries(ZONAS_MAP)) {
+    if (q.includes(k)) { filters.zonas.push(v); }
+  }
+
+  const TIPOS_MAP = {
+    "piso": "piso","apartamento": "apartamento","casa": "casa","chalet": "chalet","adosada": "adosada",
+    "obra nueva": "obra_nueva","obra nueva": "obra_nueva","desarrollo": "desarrollo",
+    "estudio": "estudio","loft": "estudio","abierto": "estudio",
+    "duplex": "apartamento","dplex": "apartamento","atico": "apartamento","attico": "apartamento",
+    "casa terrera": "casa","casa rural": "casa","casa de pueblo": "casa","casa adosada": "adosada","casa pareada": "adosada",
+    "vivienda": "piso","inmueble": "piso","propiedad": "piso",
+    "bajo": "piso","piso bajo": "piso","piso exterior": "piso","piso interior": "piso",
+    "local": "piso","nave": "piso"
+  };
+  for (const [k, v] of Object.entries(TIPOS_MAP)) {
+    if (q.includes(k)) { filters.tipos.push(v); }
+  }
+
+  const OPERACION_MAP = {
+    "comprar": "venta","compra": "venta","venta": "venta","adquirir": "venta","adquisicion": "venta",
+    "alquiler": "alquiler","alquilar": "alquiler","renta": "alquiler","rentar": "alquiler","arrendar": "alquiler",
+    "vacacional": "vacacional","vacaciones": "vacacional","temporada": "vacacional","corta temporada": "vacacional","turistica": "vacacional","turístico": "vacacional",
+  };
+  for (const [k, v] of Object.entries(OPERACION_MAP)) {
+    if (q.includes(k)) { filters.operaciones.push(v); }
+  }
+
+  const m = query.match(/(\d+)\s*(?:k|mil)/i);
+  if (m) filters.precioMax = parseInt(m[1]) * 1000;
+  else {
+    const m2 = query.match(/(\d{4,7})/);
+    if (m2) filters.precioMax = parseInt(m2[1]);
+  }
+
+  const b = query.match(/(\d+)\s*(?:hab|dormitorio|dorm|habs|dormi)/i);
+  if (b) { filters.dormMin = parseInt(b[1]); }
+  else {
+    const b2 = query.match(/(\d+)\s*(?:dormitorios|habitaciones|dormitorios|dorms)/i);
+    if (b2) filters.dormMin = parseInt(b2[1]);
+  }
+
+  const EXTRA_MAP = {
+    "piscina": "piscina","piscinas": "piscina","pileta": "piscina","piscina comunitaria": "piscina","piscina privada": "piscina","piscina climatizada": "piscina","piscina infantil": "piscina",
+    "garaje": "garaje","parking": "garaje","park": "garaje","plaza garaje": "garaje","garaje doble": "garaje","cochera": "garaje","estacionamiento": "garaje","aparcamiento": "garaje","garaje cerrado": "garaje",
+    "terraza": "terraza","balcon": "terraza","balcon": "terraza","solarium": "terraza","solarium": "terraza","porche": "terraza","patio": "terraza","terraza cubierta": "terraza","terraza descubierta": "terraza",
+    "ascensor": "ascensor","elevador": "ascensor","ascensores": "ascensor","ascensor": "ascensor",
+    "vistas": "vistas_mar","vistas mar": "vistas_mar","vista mar": "vistas_mar","vistas al mar": "vistas_mar","vista al mar": "vistas_mar","vistas oceano": "vistas_mar","vistas oceanicas": "vistas_mar",
+    "frente mar": "vistas_mar","frente al mar": "vistas_mar","primera linea mar": "vistas_mar","primera linea de playa": "vistas_mar","mar": "vistas_mar","oceano": "vistas_mar",
+    "reformado": "reformado","renovado": "reformado","rehabilitado": "reformado","restaurado": "reformado","semi reformado": "reformado","a reformar": "reformado","para reformar": "reformado",
+    "amueblado": "amueblado","equipado": "amueblado","mobiliario": "amueblado","con muebles": "amueblado","llave en mano": "amueblado","decorado": "amueblado",
+    "trastero": "trastero","almacen": "trastero","cuarto trastero": "trastero","almacenamiento": "trastero","trasteros": "trastero",
+    "jardin": "jardin","jardines": "jardin","zonas verdes": "jardin","area recreativa": "jardin","parque": "jardin","jardin privado": "jardin","jardin comunitario": "jardin"
+  };
+  for (const [k, v] of Object.entries(EXTRA_MAP)) {
+    if (q.includes(normalize(k)) && !filters.extras.includes(v)) filters.extras.push(v);
+  }
+
+  const DESC_KEYWORDS = [
+    "casa terrera","terrera",
+    "chimenea",
+    "barbacoa",
+    "calefaccion","calefaccion central","calefaccion individual","gas natural","butano","propano",
+    "aire acondicionado","climatizacion","climatizacion","aa","aire",
+    "cocina equipada","cocina americana","cocina independiente","cocina abierta","cocina office","cocina amueblada",
+    "armarios empotrados","empotrados","armarios","armario empotrado",
+    "doble acristalamiento","climalit","doble ventana","aislamiento termico",
+    "suelo radiante","suelo parquet","parquet","gres","porcelanico",
+    "domotica","smart home","casa inteligente","automatizacion",
+    "suite","bano suite","bano en suite","suite master","master suite",
+    "vestidor",
+    "despacho","oficina","oficina en casa",
+    "luminoso","exterior","mucha luz","soleado",
+    "interior",
+    "planta baja","bajo","bajo exterior",
+    "galeria","lavanderia","lavadero","tendedero",
+    "recibidor","hall","distribuidor","pasillo",
+    "salon comedor","salon","comedor",
+    "acceso minusvalidos","discapacidad","adaptado","movilidad reducida","silla ruedas","minusvalido",
+    "eficiencia energetica","certificado energetico","letra a","letra b","consumo eficiente",
+    "energia solar","placas solares","fotovoltaica","paneles solares","energia renovable",
+    "vpo","vivienda protegida","vpp","vivienda publica","protegida",
+    "alquiler","alquiler con opcion a compra","renting","arrendamiento",
+    "hipoteca","banco","dacion","ejecucion hipotecaria","subasta",
+    "puerta blindada","seguridad","puerta acorazada","alarma","vigilancia",
+    "persianas electricas","persianas automaticas","toldos",
+    "instalacion deportiva","gimnasio","pista padel","padel","cancha",
+    "zonas infantiles","parque infantil","columpios","zona juegos",
+    "conserje","portero","vigilancia 24h",
+    "vistas montana","vistas a la montaña","montana","vistas montaña",
+    "vistas piscina","vistas al jardin",
+    "orientacion","orientacion sur","orientacion norte","orientacion este","orientacion oeste",
+    "esquinero","chaflan",
+    "buhardilla","altillo","desvan",
+    "mascotas","se admiten mascotas","pets","animales","perros","gatos",
+    "videoportero","video portero","interfono",
+    "jacuzzi","spa","sauna","hidromasaje",
+    "ascensor privado",
+    "portero automatico",
+    "forrado","armario forrado",
+    "cocina equipada con electrodomesticos","cocina totalmente equipada",
+    "banco","entidad bancaria",
+    "llave en mano","listo para entrar","entrar a vivir",
+    "vistas panoramicas","vistas despejadas",
+    "zona tranquila","zona residencial","urbanizacion","zona comunitaria",
+    "piscina comunitaria","piscina privada",
+    "jardines comunitarios","zona comunitaria",
+    "pueblo","casco urbano","centro","centrico",
+    "periferia","afueras","extrarradio",
+    "cerca servicios","cerca colegios","cerca supermercado","cerca transporte","bien comunicado",
+    "amueblado","sin amueblar","vacio",
+    "exterior","interior",
+    "escaleras","escalera",
+    "planta alta","planta intermedia","planta principal","entresuelo",
+    "segunda mano","segunda mano","ocasion","venta",
+    "obra nueva","estreno",
+    "reformado integral","reforma completa",
+    "cocina y bano","cocina y baño"
+  ];
+  for (const kw of DESC_KEYWORDS) {
+    if (q.includes(kw)) { filters.descKeywords.push(kw); }
+  }
+
+  if (q.includes("barato") || q.includes("economico") || q.includes("económico") || q.includes("bajo precio") || q.includes("oferta") || q.includes("chollo") || q.includes("ganga")) filters.sortBy = "precio";
+  if (q.includes("grande") || q.includes("amplio") || q.includes("espacioso") || q.includes("espacioso") || q.includes("extenso")) filters.sortBy = "metros";
+
+  return filters;
+}
+
+function applyFilters(prop, filters) {
+  if (filters.operaciones.length > 0 && !filters.operaciones.includes(prop.operacion)) return false;
+  if (filters.zonas.length > 0 && !filters.zonas.some(z => normalize(prop.zona).includes(normalize(z)))) return false;
+  if (filters.tipos.length > 0 && !filters.tipos.includes(prop.tipo)) return false;
+  if (prop.precio > filters.precioMax) return false;
+  if (filters.dormMin !== null && (prop.dormitorios === null || prop.dormitorios < filters.dormMin)) return false;
+  for (const ex of filters.extras) {
+    if (prop[ex] !== true) return false;
+  }
+  return true;
+}
+
+async function searchClassic(query) {
+  const filters = extractFilters(query);
+  const q = normalize(query);
+  let results = props.filter(p => applyFilters(p, filters));
+
+  if (results.length === 0 && filters.zonas.length === 0 && filters.tipos.length === 0) {
+    results = [...props];
+  }
+
+  results = results.map(p => {
+    let score = 0;
+    const desc = normalize(p.descripcion + " " + p.titulo + " " + p.zona + " " + buildPropertyText(p));
+    if (q.length > 3 && desc.includes(q)) score += 0.5;
+    for (const kw of filters.descKeywords) {
+      if (desc.includes(kw)) score += 0.15;
+    }
+    return { prop: p, score: 0.3 + score };
+  });
+
+  if (filters.sortBy === "precio") results.sort((a, b) => a.prop.precio - b.prop.precio);
+  else if (filters.sortBy === "metros") results.sort((a, b) => (b.prop.metros || 0) - (a.prop.metros || 0));
+  else results.sort((a, b) => b.score - a.score);
+
+  return results;
+}
+
+async function searchSemantic(query) {
+  const filters = extractFilters(query);
+
+  const queryEmb = await extractor(query, { pooling: 'mean', normalize: true });
+  const qVec = queryEmb.tolist()[0];
+
+  let scored = props.map((prop, i) => {
+    const semScore = cos_sim(qVec, propEmbeddings[i]);
+    const passesFilters = applyFilters(prop, filters);
+    let filterBonus = 0;
+    if (passesFilters) filterBonus = 0.2;
+    else if (filters.operaciones.length > 0 || filters.zonas.length > 0 || filters.tipos.length > 0 || filters.extras.length > 0) filterBonus = -0.3;
+    const finalScore = Math.max(0, Math.min(1, semScore + filterBonus));
+    return { prop, score: finalScore, semScore, passesFilters };
+  });
+
+  scored = scored.filter(r => r.passesFilters || (filters.operaciones.length === 0 && filters.zonas.length === 0 && filters.tipos.length === 0 && filters.extras.length === 0 && filters.dormMin === null));
+  if (scored.length === 0) scored = props.map(p => {
+    const semScore = cos_sim(qVec, propEmbeddings[props.indexOf(p)]);
+    return { prop: p, score: semScore, semScore, passesFilters: false };
+  });
+
+  if (filters.sortBy === "precio") scored.sort((a, b) => a.prop.precio - b.prop.precio);
+  else if (filters.sortBy === "metros") scored.sort((a, b) => (b.prop.metros || 0) - (a.prop.metros || 0));
+  else scored.sort((a, b) => b.score - a.score);
+
+  return scored.map(r => ({ prop: r.prop, score: r.score }));
+}
+
+async function buscar(query) {
+  if (fallbackMode || !modelReady) {
+    return searchClassic(query);
+  }
+  return searchSemantic(query);
+}
+
+function addMessage(text, type) {
+  const div = document.createElement("div");
+  div.className = `message ${type}`;
+  div.innerHTML = text;
+  messagesEl.appendChild(div);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+function addTyping() {
+  const div = document.createElement("div");
+  div.className = "message bot";
+  div.id = "typing";
+  div.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
+  messagesEl.appendChild(div);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+function removeTyping() {
+  const el = document.getElementById("typing");
+  if (el) el.remove();
+}
+
+let mapa = null;
+let markersLayer = null;
+let mapViewActive = false;
+
+function toggleMapa() {
+  mapViewActive = !mapViewActive;
+  if (mapViewActive) {
+    initMapa();
+  }
+  document.getElementById("messages").style.display = mapViewActive ? "none" : "flex";
+  document.getElementById("mapContainer").style.display = mapViewActive ? "block" : "none";
+}
+
+function initMapa() {
+  if (mapa) return;
+  if (typeof L === "undefined") { console.warn("Leaflet no disponible"); return; }
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: "© OpenStreetMap",
+    maxZoom: 18,
+  }).addTo(mapa);
+  markersLayer = L.markerClusterGroup({ chunkedLoading: true });
+  const markersAdded = [];
+  for (const p of props) {
+    if (p.latitud && p.longitud) {
+      const img = p.imagen_principal
+        ? `<img src="${p.imagen_principal}" alt="">`
+        : `<div style="height:80px;display:flex;align-items:center;justify-content:center;background:#eee;border-radius:4px;margin-bottom:4px;font-size:32px">🏠</div>`;
+      const badge = p.operacion === "alquiler" ? "🔵" : p.operacion === "vacacional" ? "🟠" : "🟢";
+      const marker = L.marker([p.latitud, p.longitud]);
+      marker.bindPopup(`<div style="width:200px;cursor:pointer" onclick="window.open('${p.url}','_blank')">
+        ${img}
+        <div style="font-weight:600;font-size:13px;margin-top:2px">${p.titulo}</div>
+        <div style="font-size:15px;color:#1a73e8;font-weight:700">${formatPrecio(p.precio)}</div>
+        <div style="font-size:11px;color:#666">${badge} ${p.fuente} · ${p.zona}</div>
+      </div>`);
+      markersLayer.addLayer(marker);
+      markersAdded.push(marker);
+    }
+  }
+  if (markersAdded.length > 0) {
+    mapa.addLayer(markersLayer);
+    const group = L.featureGroup(markersAdded);
+    mapa.fitBounds(group.getBounds().pad(0.1));
+  }
+}
+
+function showQuickActions() {
+  const div = document.createElement("div");
+  div.className = "message bot";
+  div.innerHTML = `<div>Prueba con estas búsquedas:</div>
+    <div class="quick-actions">
+      <button class="quick-btn" id="qa1">Piso barato en Los Llanos</button>
+      <button class="quick-btn" id="qa2">Casa con piscina Tazacorte</button>
+      <button class="quick-btn" id="qa3">Piso con garaje y ascensor</button>
+      <button class="quick-btn" id="qa4">Chalet con vistas al mar</button>
+      <button class="quick-btn" id="qa5">Apartamento reformado</button>
+      <button class="quick-btn" id="qa6">Casa terrera con jardin</button>
+      <button class="quick-btn" id="qa7">Piso grande en Santa Cruz</button>
+      <button class="quick-btn" id="qa8">El Paso casa barata</button>
+      <button class="quick-btn" id="qa9">Con terraza y trastero</button>
+      <button class="quick-btn" id="qa10">Ver todos</button>
+    </div>`;
+  messagesEl.appendChild(div);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+  document.getElementById("qa1").onclick = () => quickSearch("Piso barato en Los Llanos");
+  document.getElementById("qa2").onclick = () => quickSearch("Casa en Tazacorte con piscina");
+  document.getElementById("qa3").onclick = () => quickSearch("Piso con garaje y ascensor");
+  document.getElementById("qa4").onclick = () => quickSearch("Chalet con vistas al mar");
+  document.getElementById("qa5").onclick = () => quickSearch("Apartamento reformado");
+  document.getElementById("qa6").onclick = () => quickSearch("Casa terrera con jardin");
+  document.getElementById("qa7").onclick = () => quickSearch("Piso grande en Santa Cruz");
+  document.getElementById("qa8").onclick = () => quickSearch("Casa barata en El Paso");
+  document.getElementById("qa9").onclick = () => quickSearch("Piso con terraza y trastero");
+  document.getElementById("qa10").onclick = () => quickSearch("todos");
+}
+
+function quickSearch(q) {
+  inputEl.value = q;
+  sendMessage();
+}
+
+async function sendMessage() {
+  const query = inputEl.value.trim();
+  if (!query) return;
+  if (!modelReady) { addMessage("El motor de IA aún está cargándose. Espera unos segundos y vuelve a intentarlo.", "system"); return; }
+  sendBtn.disabled = true;
+  addMessage(query, "user");
+  inputEl.value = "";
+  addTyping();
+  try {
+    const results = await buscar(query);
+    removeTyping();
+    if (query.toLowerCase() === "todos") {
+      const all = props.map(p => ({ prop: p, score: 0 }));
+      all.sort((a, b) => a.prop.zona.localeCompare(b.prop.zona));
+      showResults(all, query);
+    } else if (results.length === 0) {
+      addMessage("No encontré viviendas que coincidan con tu búsqueda. Prueba con otras palabras: piso, casa, chalet, apartamento, Los Llanos, Tazacorte, El Paso, piscina, garaje, terraza, ascensor, vistas al mar, reformado, amueblado, 2 habitaciones, barato, grande...", "bot");
+    } else {
+      showResults(results, query);
+    }
+  } catch (e) {
+    removeTyping();
+    console.error("Error en búsqueda:", e);
+    const fallback = await searchClassic(query);
+    if (fallback.length > 0) showResults(fallback, query);
+    else addMessage("Hubo un error procesando tu consulta. Intenta de nuevo.", "system");
+  }
+  sendBtn.disabled = false;
+  inputEl.focus();
+}
+
+function showResults(results, query) {
+  const shown = results.slice(0, 8);
+  let html = `<div>He encontrado <strong>${results.length}</strong> resultado${results.length !== 1 ? "s" : ""}`;
+  const vc = results.filter(r => r.prop.verificada).length;
+  const hc = results.filter(r => !r.prop.verificada).length;
+  if (vc > 0 && hc > 0) html += ` (${vc} verificadas, ${hc} históricas)`;
+  html += `, mostrando las ${Math.min(shown.length, 8)} más relevantes:</div>`;
+
+  html += `<div class="map-toggle">
+    <button id="btnLista" class="active" onclick="toggleView('lista')">📋 Lista</button>
+    <button id="btnMapa" onclick="toggleMapa()">🗺️ Mapa</button>
+  </div>`;
+
+  for (const r of shown) html += formatCard(r.prop, r.score);
+  if (results.length > 8) html += `<div style="margin-top:8px;font-size:13px;color:#888;">... y ${results.length - 8} más. Sé más específico para ver menos resultados.</div>`;
+
+  addMessage(html, "bot");
+}
+
+function toggleView(view) {
+  if (view === "mapa") {
+    toggleMapa();
+  } else {
+    if (mapViewActive) toggleMapa();
+  }
+}
+
+inputEl.addEventListener("keydown", e => { if (e.key === "Enter") sendMessage(); });
+
+addMessage("¡Hola! Soy tu asistente con IA para vivienda en La Palma. Busco casas, pisos, apartamentos, chalets, adosadas, estudios y obra nueva. Puedes preguntar: piscina, garaje, terraza, vistas al mar, reformado, jardín, ascensor, trastero, casa terrera, barbacoa, chimenea, ático, dúplex... ¡Prueba con lenguaje natural!", "bot");
+loadData().then(() => {});
+</script>
+</body>
+</html>
