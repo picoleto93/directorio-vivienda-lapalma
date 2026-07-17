@@ -85,7 +85,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 <div class="chat-container">
   <div class="chat-header">
     <h1>Vivienda La Palma</h1>
-    <p>Búsqueda inteligente · <span id="propCount">442</span> viviendas < 220.000€</p>
+    <p>Búsqueda inteligente · <span id="propCount">442</span> viviendas en La Palma</p>
     <div class="model-status" id="modelStatus">Iniciando motor de IA...</div>
     <div class="model-status" id="dataStatus" style="font-size:10px"></div>
   </div>
@@ -124,7 +124,6 @@ async function loadData() {
     if (typeof initModel === "function") initModel();
   }
 }
-const PRECIO_MAXIMO = 220000;
 let extractor = null;
 let propEmbeddings = [];
 let modelReady = false;
@@ -253,7 +252,7 @@ async function initModel() {
 
 function extractFilters(query) {
   const q = normalize(query);
-  const filters = { operaciones: [], zonas: [], tipos: [], precioMax: PRECIO_MAXIMO, dormMin: null, extras: [], descKeywords: [] };
+  const filters = { operaciones: [], zonas: [], tipos: [], precioMax: Infinity, dormMin: null, extras: [], descKeywords: [] };
 
   const ZONAS_MAP = {
     "los llanos": "Los Llanos de Aridane","llanos": "Los Llanos de Aridane","los llanos de aridane": "Los Llanos de Aridane",
@@ -615,8 +614,8 @@ function showResults(results, query) {
   html += `, mostrando las ${Math.min(shown.length, 8)} más relevantes:</div>`;
 
   html += `<div class="map-toggle">
-    <button id="btnLista" class="active" onclick="toggleView('lista')">📋 Lista</button>
-    <button id="btnMapa" onclick="toggleMapa()">🗺️ Mapa</button>
+    <button id="btnLista" class="active">📋 Lista</button>
+    <button id="btnMapa">🗺️ Mapa</button>
   </div>`;
 
   for (const r of shown) html += formatCard(r.prop, r.score);
@@ -635,6 +634,10 @@ function toggleView(view) {
 
 inputEl.addEventListener("keydown", e => { if (e.key === "Enter") sendMessage(); });
 sendBtn.addEventListener("click", sendMessage);
+messagesEl.addEventListener("click", e => {
+  if (e.target.id === "btnMapa") toggleMapa();
+  if (e.target.id === "btnLista") toggleView("lista");
+});
 
 addMessage("¡Hola! Soy tu asistente con IA para vivienda en La Palma. Busco casas, pisos, apartamentos, chalets, adosadas, estudios y obra nueva. Puedes preguntar: piscina, garaje, terraza, vistas al mar, reformado, jardín, ascensor, trastero, casa terrera, barbacoa, chimenea, ático, dúplex... ¡Prueba con lenguaje natural!", "bot");
 loadData().then(() => {});
