@@ -578,12 +578,24 @@ async function sendMessage() {
       all.sort((a, b) => a.prop.zona.localeCompare(b.prop.zona));
       showResults(all, query);
     } else if (results.length === 0) {
-      const filters = extractFilters(query);
-      let suggest = "piso, casa, chalet, Los Llanos, Tazacorte, El Paso, piscina, garaje, terraza, ascensor, vistas al mar, reformado, amueblado, 2 habitaciones, barato, grande";
-      if (filters.tipos.length > 0 || filters.zonas.length > 0 || filters.extras.length > 0) {
-        suggest = "prueba con términos más generales o elimina algún filtro";
+      const hadContext = ctx.zonas.length > 0 || ctx.tipos.length > 0 || ctx.operaciones.length > 0;
+      const relaxed = hadContext ? await buscar(query, false) : [];
+
+      if (relaxed.length > 0) {
+        const blockers = [];
+        if (ctx.zonas.length > 0) blockers.push("zona");
+        if (ctx.tipos.length > 0) blockers.push("tipo");
+        if (ctx.operaciones.length > 0) blockers.push("operación");
+        addMessage(`No hay resultados con los filtros de la conversación anterior (${blockers.join(", ")}). Te muestro resultados sin ese filtro:`, "bot");
+        showResults(relaxed, query);
+      } else {
+        const filters = extractFilters(query);
+        let suggest = "prueba con otras palabras: piso, casa, Los Llanos, Tazacorte, El Paso, piscina, garaje, terraza";
+        if (filters.tipos.length > 0 || filters.zonas.length > 0 || filters.extras.length > 0) {
+          suggest = "prueba con términos más generales o elimina algún filtro";
+        }
+        addMessage("No encontré viviendas que coincidan. " + suggest + ".", "bot");
       }
-      addMessage("No encontré viviendas que coincidan exactamente con tu búsqueda. " + suggest + ".", "bot");
     } else {
       showResults(results, query);
     }
