@@ -579,15 +579,30 @@ async function sendMessage() {
       showResults(all, query);
     } else if (results.length === 0) {
       const hadContext = ctx.zonas.length > 0 || ctx.tipos.length > 0 || ctx.operaciones.length > 0;
-      const relaxed = hadContext ? await buscar(query, false) : [];
 
-      if (relaxed.length > 0) {
-        const blockers = [];
-        if (ctx.zonas.length > 0) blockers.push("zona");
-        if (ctx.tipos.length > 0) blockers.push("tipo");
-        if (ctx.operaciones.length > 0) blockers.push("operación");
-        addMessage(`No hay resultados con los filtros de la conversación anterior (${blockers.join(", ")}). Te muestro resultados sin ese filtro:`, "bot");
-        showResults(relaxed, query);
+      if (hadContext) {
+        let fb = extractFilters(query);
+        if (fb.zonas.length === 0 && ctx.zonas.length > 0) fb.zonas = [...ctx.zonas];
+        if (fb.operaciones.length === 0 && ctx.operaciones.length > 0) fb.operaciones = [...ctx.operaciones];
+        const relaxed = fallbackMode || !modelReady
+          ? await searchClassic(query, fb)
+          : await searchSemantic(query, fb);
+
+        if (relaxed.length > 0) {
+          const parts = [];
+          if (fb.operaciones.length > 0) parts.push(fb.operaciones.join("/"));
+          if (fb.zonas.length > 0) parts.push("en " + fb.zonas.join(", "));
+          addMessage(`No hay viviendas de ese tipo en esa zona. Te muestro ${parts.join(" ")} disponibles:`, "bot");
+          showResults(relaxed, query);
+        } else {
+          const relaxed2 = await buscar(query, false);
+          if (relaxed2.length > 0) {
+            addMessage("No encontré resultados con los filtros anteriores. Te muestro resultados sin filtrar:", "bot");
+            showResults(relaxed2, query);
+          } else {
+            addMessage("No encontré viviendas que coincidan. Prueba con otras palabras.", "bot");
+          }
+        }
       } else {
         const filters = extractFilters(query);
         let suggest = "prueba con otras palabras: piso, casa, Los Llanos, Tazacorte, El Paso, piscina, garaje, terraza";
