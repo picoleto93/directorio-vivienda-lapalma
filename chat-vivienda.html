@@ -509,6 +509,7 @@ function toggleMapa() {
 function initMapa() {
   if (mapa) return;
   if (typeof L === "undefined") { console.warn("Leaflet no disponible"); return; }
+  mapa = L.map("mapContainer").setView([28.65, -17.91], 10);
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     attribution: "© OpenStreetMap",
     maxZoom: 18,
