@@ -24,16 +24,7 @@ jobs:
         run: python scraper/scraper_yaencontre.py
 
       - name: Validate scraped data
-        run: |
-          python -c "
-import json
-d = json.load(open('propiedades.json'))
-count = len(d.get('propiedades', []))
-print(f'Propiedades: {count}')
-if count < 100:
-  print(f'ERROR: solo {count} propiedades (esperado >= 100)')
-  exit(1)
-"
+        run: python -c "import json; d=json.load(open('propiedades.json')); c=len(d.get('propiedades',[])); print(f'Propiedades: {c}'); exit(1 if c<100 else 0)"
 
       - name: Commit updated data
         run: |
