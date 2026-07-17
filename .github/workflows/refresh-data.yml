@@ -23,6 +23,18 @@ jobs:
       - name: Scrape yaencontre
         run: python scraper/scraper_yaencontre.py
 
+      - name: Validate scraped data
+        run: |
+          python -c "
+import json
+d = json.load(open('propiedades.json'))
+count = len(d.get('propiedades', []))
+print(f'Propiedades: {count}')
+if count < 100:
+  print(f'ERROR: solo {count} propiedades (esperado >= 100)')
+  exit(1)
+"
+
       - name: Commit updated data
         run: |
           git config user.name "github-actions"
