@@ -6,69 +6,56 @@
 <title>Chat Vivienda La Palma</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f0f2f5;height:100vh;display:flex;justify-content:center;align-items:center}
-.chat-container{width:100%;max-width:480px;height:100vh;max-height:900px;background:#fff;display:flex;flex-direction:column;border-radius:0;box-shadow:none;position:relative}
-@media(min-width:500px){.chat-container{border-radius:16px;height:90vh;box-shadow:0 8px 32px rgba(0,0,0,.12)}}
-.chat-header{background:#1a73e8;color:#fff;padding:16px 20px;border-radius:0;text-align:center;position:relative}
-@media(min-width:500px){.chat-header{border-radius:16px 16px 0 0}}
-.chat-header h1{font-size:18px;font-weight:600}
-.chat-header p{font-size:13px;opacity:.9;margin-top:4px}
-.chat-header .model-status{font-size:11px;opacity:.7;margin-top:4px;font-style:italic}
-.messages{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;scroll-behavior:smooth}
-.message{max-width:88%;padding:12px 14px;border-radius:14px;font-size:14px;line-height:1.5;animation:fadeIn .25s ease}
-@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-.message.bot{background:#f0f2f5;align-self:flex-start;border-bottom-left-radius:4px}
-.message.user{background:#1a73e8;color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
-.message.system{background:#fff8e1;color:#795548;align-self:center;font-size:13px;border-radius:8px;max-width:75%;text-align:center}
-.quick-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
-.quick-btn{background:#e8f0fe;color:#1a73e8;border:1px solid #d2e3fc;padding:8px 14px;border-radius:20px;font-size:13px;cursor:pointer;transition:all .15s}
-.quick-btn:hover{background:#d2e3fc;transform:scale(1.02)}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f5f5f5;height:100vh;display:flex;justify-content:center;align-items:center}
+.chat-container{width:100%;max-width:480px;height:100vh;max-height:900px;background:#fff;display:flex;flex-direction:column;position:relative}
+@media(min-width:500px){.chat-container{height:90vh;box-shadow:0 4px 24px rgba(0,0,0,.08);border-radius:0}}
+.chat-header{padding:16px 20px 12px;border-bottom:1px solid #eee;text-align:center}
+.chat-header h1{font-size:17px;font-weight:600;color:#222}
+.chat-header p{font-size:12px;color:#777;margin-top:2px}
+.chat-header .model-status{font-size:11px;color:#999;margin-top:4px}
+.messages{flex:1;overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;gap:6px;scroll-behavior:smooth}
+.message{max-width:85%;padding:10px 14px;font-size:14px;line-height:1.5;animation:fadeIn .2s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.message.bot{background:transparent;align-self:flex-start;padding:10px 0;border-bottom:1px solid #f0f0f0}
+.message.user{background:#e8f0fe;color:#1a1a1a;align-self:flex-end;border-radius:12px 12px 4px 12px}
+.message.system{color:#888;align-self:center;font-size:12px;max-width:80%;text-align:center;padding:6px 12px}
+.quick-actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.quick-btn{background:transparent;color:#555;border:1px solid #ddd;padding:6px 12px;border-radius:16px;font-size:12px;cursor:pointer;transition:all .15s}
+.quick-btn:hover{background:#f5f5f5;border-color:#bbb}
 .quick-btn:disabled{opacity:.5;cursor:wait}
-.result-card{background:#fff;border:1px solid #e0e0e0;border-radius:12px;padding:14px;margin-top:8px;box-shadow:0 2px 8px rgba(0,0,0,.04)}
-.result-card .title{font-weight:600;font-size:15px;color:#1a1a1a}
-.result-card .price{font-size:18px;font-weight:700;color:#1a73e8;margin:4px 0}
-.result-card .details{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
-.result-card .detail-tag{background:#f5f5f5;padding:3px 10px;border-radius:12px;font-size:12px;color:#555}
-.result-card .detail-tag.highlight{background:#e8f5e9;color:#2e7d32}
-.result-card .desc{font-size:13px;color:#666;margin:6px 0}
-.result-card .meta{font-size:12px;color:#999;margin-top:6px}
-.result-card .meta a{color:#1a73e8;text-decoration:none}
-.result-card .meta a:hover{text-decoration:underline}
-.result-card .warning{background:#fff3e0;color:#e65100;padding:6px 10px;border-radius:8px;font-size:12px;margin-top:6px}
-.result-card .relevance{font-size:11px;color:#1a73e8;margin-top:4px}
-.input-area{display:flex;gap:8px;padding:12px 16px;border-top:1px solid #e0e0e0;background:#fff}
-@media(min-width:500px){.input-area{border-radius:0 0 16px 16px}}
-.input-area input{flex:1;padding:10px 14px;border:1px solid #ddd;border-radius:24px;font-size:14px;outline:none;transition:border .15s}
-.input-area input:focus{border-color:#1a73e8}
-.input-area button{background:#1a73e8;color:#fff;border:none;width:42px;height:42px;border-radius:50%;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;transition:background .15s;flex-shrink:0}
-.input-area button:hover{background:#1557b0}
-.input-area button:disabled{opacity:.5;cursor:default}
-.typing{display:flex;gap:4px;padding:4px 0}
-.typing span{width:6px;height:6px;background:#999;border-radius:50%;animation:bounce 1.2s infinite}
-.typing span:nth-child(2){animation-delay:.2s}
-.typing span:nth-child(3){animation-delay:.4s}
-@keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-6px)}}
-.progress-bar{height:3px;background:#e0e0e0;border-radius:2px;overflow:hidden;margin-top:8px}
-.progress-bar .fill{height:100%;background:#1a73e8;width:0%;transition:width .3s ease;border-radius:2px}
-.result-card{display:flex;gap:12px;background:#fff;border:1px solid #e0e0e0;border-radius:12px;padding:10px;margin-top:8px;box-shadow:0 2px 8px rgba(0,0,0,.04)}
-.card-img{width:120px;min-width:120px;height:100px;border-radius:8px;overflow:hidden;position:relative;cursor:pointer;background:#f0f2f5}
+.result-card{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid #f0f0f0}
+.result-card:last-child{border-bottom:none}
+.card-img{width:110px;min-width:110px;height:90px;border-radius:6px;overflow:hidden;position:relative;cursor:pointer;background:#f5f5f5}
 .card-img img{width:100%;height:100%;object-fit:cover;display:block}
-.badge{position:absolute;top:6px;left:6px;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;color:#fff;line-height:1.3}
+.badge{position:absolute;top:5px;left:5px;font-size:9px;font-weight:600;padding:2px 6px;border-radius:3px;color:#fff;line-height:1.3}
 .badge-venta{background:#2e7d32}
 .badge-alquiler{background:#1565c0}
 .badge-vacacional{background:#e65100}
-.card-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
-.card-body .title{font-weight:600;font-size:14px;color:#1a1a1a;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.card-body .price{font-size:17px;font-weight:700;color:#1a73e8;line-height:1.2}
-.card-body .price .m2{font-size:12px;font-weight:400;color:#888}
-.card-body .details{display:flex;flex-wrap:wrap;gap:3px}
-.card-body .detail-tag{background:#f5f5f5;padding:2px 8px;border-radius:10px;font-size:11px;color:#555}
-.card-body .meta{font-size:11px;color:#999;line-height:1.3}
+.card-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.card-body .title{font-weight:500;font-size:14px;color:#222;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card-body .price{font-size:16px;font-weight:600;color:#1a73e8;line-height:1.3}
+.card-body .price .m2{font-size:11px;font-weight:400;color:#999}
+.card-body .details{display:flex;flex-wrap:wrap;gap:2px}
+.card-body .detail-tag{background:#f5f5f5;padding:2px 7px;border-radius:8px;font-size:10px;color:#666}
+.card-body .meta{font-size:11px;color:#aaa;line-height:1.3}
 .card-body .meta .fuente{color:#1a73e8;font-weight:500}
-.btn-yaencontre{display:inline-flex;align-items:center;gap:4px;background:#fff;border:1px solid #1a73e8;color:#1a73e8;padding:4px 12px;border-radius:16px;font-size:11px;font-weight:600;text-decoration:none;cursor:pointer;transition:all .15s;margin-top:2px;align-self:flex-start}
-.btn-yaencontre:hover{background:#1a73e8;color:#fff}
-.result-card .warning{background:#fff3e0;color:#e65100;padding:4px 8px;border-radius:6px;font-size:11px;margin-top:4px}
-.result-card .relevance{font-size:11px;color:#1a73e8;margin-top:2px}
+.btn-yaencontre{display:inline-flex;align-items:center;gap:3px;background:transparent;border:none;color:#1a73e8;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:500;text-decoration:none;cursor:pointer;transition:all .15s;align-self:flex-start}
+.btn-yaencontre:hover{background:#e8f0fe}
+.result-card .warning{color:#999;font-size:11px;margin-top:2px;padding:0}
+.result-card .relevance{font-size:10px;color:#999;margin-top:1px}
+.input-area{display:flex;gap:8px;padding:10px 16px;border-top:1px solid #eee;background:#fff}
+.input-area input{flex:1;padding:10px 14px;border:1px solid #e0e0e0;border-radius:20px;font-size:14px;outline:none;transition:border .15s}
+.input-area input:focus{border-color:#1a73e8}
+.input-area button{background:#1a73e8;color:#fff;border:none;width:38px;height:38px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:background .15s;flex-shrink:0}
+.input-area button:hover{background:#1557b0}
+.input-area button:disabled{opacity:.5;cursor:default}
+.typing{display:flex;gap:3px;padding:6px 0}
+.typing span{width:5px;height:5px;background:#ccc;border-radius:50%;animation:bounce 1.2s infinite}
+.typing span:nth-child(2){animation-delay:.2s}
+.typing span:nth-child(3){animation-delay:.4s}
+@keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-4px)}}
+.progress-bar{height:2px;background:#f0f0f0;overflow:hidden;margin-top:4px}
+.progress-bar .fill{height:100%;background:#1a73e8;width:0%;transition:width .3s ease}
 </style>
 </head>
 <body>
@@ -116,6 +103,39 @@ let extractor = null;
 let propEmbeddings = [];
 let modelReady = false;
 let fallbackMode = false;
+let ctx = { zonas: [], tipos: [], operaciones: [], precioMin: 0, precioMax: Infinity, dormMin: null, extras: [], sortBy: null };
+
+function mergeContext(filters, query) {
+  const q = normalize(query);
+  const resetWords = ["nueva busqueda", "nueva búsqueda", "reset", "reiniciar", "empezar de nuevo", "limpiar", "otra cosa", "olvidar", "borrar", "nuevo"];
+  if (resetWords.some(w => q.includes(w))) { ctx = { zonas: [], tipos: [], operaciones: [], precioMin: 0, precioMax: Infinity, dormMin: null, extras: [], sortBy: null }; return filters; }
+
+  if (filters.zonas.length === 0 && ctx.zonas.length > 0) filters.zonas = [...ctx.zonas];
+  else if (filters.zonas.length > 0) ctx.zonas = [...filters.zonas];
+
+  if (filters.tipos.length === 0 && ctx.tipos.length > 0) filters.tipos = [...ctx.tipos];
+  else if (filters.tipos.length > 0) ctx.tipos = [...filters.tipos];
+
+  if (filters.operaciones.length === 0 && ctx.operaciones.length > 0) filters.operaciones = [...ctx.operaciones];
+  else if (filters.operaciones.length > 0) ctx.operaciones = [...filters.operaciones];
+
+  if (filters.precioMax === Infinity && ctx.precioMax < Infinity) { filters.precioMax = ctx.precioMax; }
+  else if (filters.precioMax < Infinity) ctx.precioMax = filters.precioMax;
+
+  if (filters.precioMin === 0 && ctx.precioMin > 0) filters.precioMin = ctx.precioMin;
+  else if (filters.precioMin > 0) ctx.precioMin = filters.precioMin;
+
+  if (filters.dormMin === null && ctx.dormMin !== null) filters.dormMin = ctx.dormMin;
+  else if (filters.dormMin !== null) ctx.dormMin = filters.dormMin;
+
+  if (filters.extras.length === 0 && ctx.extras.length > 0) filters.extras = [...ctx.extras];
+  else if (filters.extras.length > 0) ctx.extras = [...filters.extras];
+
+  if (!filters.sortBy && ctx.sortBy) filters.sortBy = ctx.sortBy;
+  else if (filters.sortBy) ctx.sortBy = filters.sortBy;
+
+  return filters;
+}
 
 const messagesEl = document.getElementById("messages");
 const inputEl = document.getElementById("input");
@@ -249,7 +269,7 @@ async function initModel() {
 
 function extractFilters(query) {
   const q = normalize(query);
-  const filters = { operaciones: [], zonas: [], tipos: [], precioMax: Infinity, dormMin: null, extras: [], descKeywords: [], detected: [] };
+  const filters = { operaciones: [], zonas: [], tipos: [], precioMax: Infinity, precioMin: 0, dormMin: null, extras: [], descKeywords: [], detected: [] };
   const w = (word) => new RegExp("\\b" + normalize(word) + "\\b", "i").test(q);
 
   const ZONAS_MAP = {
@@ -298,8 +318,16 @@ function extractFilters(query) {
   const m = query.match(/(\d+)\s*(?:k|mil)/i);
   if (m) { filters.precioMax = parseInt(m[1]) * 1000; filters.detected.push("precio max: " + filters.precioMax); }
   else {
-    const m2 = query.match(/(\d{4,7})/);
-    if (m2) { filters.precioMax = parseInt(m2[1]); filters.detected.push("precio max: " + filters.precioMax); }
+    const rangeMatch = query.match(/(?:entre|de)\s+(\d+)(?:\s*(?:k|mil|\.|,))?\s*(?:y|a)\s+(\d+)(?:\s*(?:k|mil|\.|,))?/i);
+    if (rangeMatch) {
+      filters.precioMin = parseInt(rangeMatch[1]) * (rangeMatch[1].length <= 3 ? 1000 : 1);
+      filters.precioMax = parseInt(rangeMatch[2]) * (rangeMatch[2].length <= 3 ? 1000 : 1);
+      filters.detected.push("precio min: " + filters.precioMin);
+      filters.detected.push("precio max: " + filters.precioMax);
+    } else {
+      const m2 = query.match(/(\d{4,7})/);
+      if (m2) { filters.precioMax = parseInt(m2[1]); filters.detected.push("precio max: " + filters.precioMax); }
+    }
   }
 
   const b = query.match(/(\d+)\s*(?:hab|dormitorio|dorm|habs|dormi)/i);
@@ -400,6 +428,7 @@ function applyFilters(prop, filters) {
   if (filters.operaciones.length > 0 && !filters.operaciones.includes(prop.operacion)) return false;
   if (filters.zonas.length > 0 && !filters.zonas.some(z => normalize(prop.zona).includes(normalize(z)))) return false;
   if (filters.tipos.length > 0 && !filters.tipos.includes(prop.tipo)) return false;
+  if (prop.precio < filters.precioMin) return false;
   if (prop.precio > filters.precioMax) return false;
   if (filters.dormMin !== null && (prop.dormitorios === null || prop.dormitorios < filters.dormMin)) return false;
   for (const ex of filters.extras) {
@@ -408,8 +437,7 @@ function applyFilters(prop, filters) {
   return true;
 }
 
-async function searchClassic(query) {
-  const filters = extractFilters(query);
+async function searchClassic(query, filters) {
   const q = normalize(query);
   let results = props.filter(p => applyFilters(p, filters));
 
@@ -447,8 +475,7 @@ async function searchClassic(query) {
   return results;
 }
 
-async function searchSemantic(query) {
-  const filters = extractFilters(query);
+async function searchSemantic(query, filters) {
 
   const queryEmb = await extractor(query, { pooling: 'mean', normalize: true });
   const qVec = queryEmb.tolist()[0];
@@ -488,11 +515,13 @@ async function searchSemantic(query) {
   return scored.map(r => ({ prop: r.prop, score: r.score }));
 }
 
-async function buscar(query) {
+async function buscar(query, withContext) {
+  let filters = extractFilters(query);
+  if (withContext) filters = mergeContext(filters, query);
   if (fallbackMode || !modelReady) {
-    return searchClassic(query);
+    return searchClassic(query, filters);
   }
-  return searchSemantic(query);
+  return searchSemantic(query, filters);
 }
 
 function addMessage(text, type) {
@@ -561,7 +590,7 @@ async function sendMessage() {
   inputEl.value = "";
   addTyping();
   try {
-    const results = await buscar(query);
+    const results = await buscar(query, true);
     removeTyping();
     if (query.toLowerCase() === "todos") {
       const all = props.map(p => ({ prop: p, score: 0 }));
@@ -580,7 +609,7 @@ async function sendMessage() {
   } catch (e) {
     removeTyping();
     console.error("Error en búsqueda:", e);
-    const fallback = await searchClassic(query);
+    const fallback = await searchClassic(query, extractFilters(query));
     if (fallback.length > 0) showResults(fallback, query);
     else addMessage("Hubo un error procesando tu consulta. Intenta de nuevo.", "system");
   }
@@ -590,7 +619,8 @@ async function sendMessage() {
 
 function showResults(results, query) {
   const shown = results.slice(0, 8);
-  const filters = extractFilters(query);
+  let filters = extractFilters(query);
+  filters = mergeContext(filters, query);
   let html = `<div>He encontrado <strong>${results.length}</strong> resultado${results.length !== 1 ? "s" : ""}`;
   const vc = results.filter(r => r.prop.verificada).length;
   const hc = results.filter(r => !r.prop.verificada).length;
@@ -604,6 +634,7 @@ function showResults(results, query) {
       if (d.startsWith("tipo: ")) return `<strong>${d.slice(6)}</strong>`;
       if (d.startsWith("operacion: ")) return `para <strong>${opMap[d.slice(11)] || d.slice(11)}</strong>`;
       if (d.startsWith("extra: ")) return `con <strong>${d.slice(6)}</strong>`;
+      if (d.startsWith("precio min: ")) return `desde <strong>${formatPrecio(parseInt(d.slice(12)))}</strong>`;
       if (d.startsWith("precio max: ")) return `hasta <strong>${formatPrecio(parseInt(d.slice(12)))}</strong>`;
       if (d.startsWith("min dorm: ")) return `mín. <strong>${d.slice(10)} hab</strong>`;
       if (d.startsWith("orden: ")) return `orden: <strong>${d.slice(7)}</strong>`;
