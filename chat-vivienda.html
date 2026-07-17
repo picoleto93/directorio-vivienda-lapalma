@@ -103,13 +103,9 @@ let extractor = null;
 let propEmbeddings = [];
 let modelReady = false;
 let fallbackMode = false;
-let ctx = { zonas: [], tipos: [], operaciones: [], precioMin: 0, precioMax: Infinity, dormMin: null, extras: [], sortBy: null };
+let ctx = { zonas: [], tipos: [], operaciones: [] };
 
-function mergeContext(filters, query) {
-  const q = normalize(query);
-  const resetWords = ["nueva busqueda", "nueva búsqueda", "reset", "reiniciar", "empezar de nuevo", "limpiar", "otra cosa", "olvidar", "borrar", "nuevo"];
-  if (resetWords.some(w => q.includes(w))) { ctx = { zonas: [], tipos: [], operaciones: [], precioMin: 0, precioMax: Infinity, dormMin: null, extras: [], sortBy: null }; return filters; }
-
+function mergeContext(filters) {
   if (filters.zonas.length === 0 && ctx.zonas.length > 0) filters.zonas = [...ctx.zonas];
   else if (filters.zonas.length > 0) ctx.zonas = [...filters.zonas];
 
@@ -118,21 +114,6 @@ function mergeContext(filters, query) {
 
   if (filters.operaciones.length === 0 && ctx.operaciones.length > 0) filters.operaciones = [...ctx.operaciones];
   else if (filters.operaciones.length > 0) ctx.operaciones = [...filters.operaciones];
-
-  if (filters.precioMax === Infinity && ctx.precioMax < Infinity) { filters.precioMax = ctx.precioMax; }
-  else if (filters.precioMax < Infinity) ctx.precioMax = filters.precioMax;
-
-  if (filters.precioMin === 0 && ctx.precioMin > 0) filters.precioMin = ctx.precioMin;
-  else if (filters.precioMin > 0) ctx.precioMin = filters.precioMin;
-
-  if (filters.dormMin === null && ctx.dormMin !== null) filters.dormMin = ctx.dormMin;
-  else if (filters.dormMin !== null) ctx.dormMin = filters.dormMin;
-
-  if (filters.extras.length === 0 && ctx.extras.length > 0) filters.extras = [...ctx.extras];
-  else if (filters.extras.length > 0) ctx.extras = [...filters.extras];
-
-  if (!filters.sortBy && ctx.sortBy) filters.sortBy = ctx.sortBy;
-  else if (filters.sortBy) ctx.sortBy = filters.sortBy;
 
   return filters;
 }
@@ -517,7 +498,7 @@ async function searchSemantic(query, filters) {
 
 async function buscar(query, withContext) {
   let filters = extractFilters(query);
-  if (withContext) filters = mergeContext(filters, query);
+  if (withContext) filters = mergeContext(filters);
   if (fallbackMode || !modelReady) {
     return searchClassic(query, filters);
   }
@@ -619,8 +600,7 @@ async function sendMessage() {
 
 function showResults(results, query) {
   const shown = results.slice(0, 8);
-  let filters = extractFilters(query);
-  filters = mergeContext(filters, query);
+  const filters = extractFilters(query);
   let html = `<div>He encontrado <strong>${results.length}</strong> resultado${results.length !== 1 ? "s" : ""}`;
   const vc = results.filter(r => r.prop.verificada).length;
   const hc = results.filter(r => !r.prop.verificada).length;
